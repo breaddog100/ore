@@ -443,7 +443,7 @@ function main_menu() {
         clear
         echo "===============ORE一键部署脚本==============="
 	    echo "BreadDog出品，电报：https://t.me/breaddog"
-	    echo "最低配置：4C8G100G；推荐配置：4C16G512G"
+	    echo "单号需要的资源：1C1G5G；可根据自身情况多开"
 		echo "请选择要执行的操作:"
         echo "1. 部署节点"
         echo "2. 导入钱包运行"
