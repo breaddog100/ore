@@ -188,29 +188,34 @@ function check_logs() {
 
 # 主菜单
 function main_menu() {
-    clear
-    echo "===============ORE一键部署脚本==============="
-    echo "BreadDog出品，电报：https://t.me/breaddog"
-    echo "单号需要的资源：1C1G5G；可根据自身情况多开"
-	echo "请选择要执行的操作:"
-    echo "1. 部署节点"
-    echo "2. 开始挖矿"
-    echo "3. 查看奖励"
-    echo "4. 领取奖励"
-    echo "5. 停止挖矿"
-    echo "6. 查看日志"
-    echo "0. 退出脚本exit"
-    read -p "请输入选项: " OPTION
-
-    case $OPTION in
-    1) install_node ;;
-    2) start_mining ;;
-    3) check_multiple ;;
-    4) cliam_multiple ;;
-    5) stop_mining ;;
-    6) check_logs ;;    0) echo "退出脚本。"; exit 0 ;;
-    *) echo "无效选项，请重新输入。"; sleep 3 ;;
-    esac
+	while true; do
+	    clear
+	    echo "===============ORE一键部署脚本==============="
+	    echo "BreadDog出品，电报：https://t.me/breaddog"
+	    echo "单号需要的资源：1C1G5G；可根据自身情况多开"
+		echo "请选择要执行的操作:"
+	    echo "1. 部署节点"
+	    echo "2. 开始挖矿"
+	    echo "3. 查看奖励"
+	    echo "4. 领取奖励"
+	    echo "5. 停止挖矿"
+	    echo "6. 查看日志"
+	    echo "0. 退出脚本exit"
+	    read -p "请输入选项: " OPTION
+	
+	    case $OPTION in
+	    1) install_node ;;
+	    2) start_mining ;;
+	    3) check_multiple ;;
+	    4) cliam_multiple ;;
+	    5) stop_mining ;;
+	    6) check_logs ;;
+	    0) echo "退出脚本。"; exit 0 ;;
+	    *) echo "无效选项，请重新输入。"; sleep 3 ;;
+	    esac
+        echo "按任意键返回主菜单..."
+        read -n 1
+    done
 }
 
 # 显示主菜单
