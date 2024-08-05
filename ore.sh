@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240805001
+current_version=20240806001
 
 update_script() {
     # 指定URL
@@ -230,7 +230,7 @@ function main_menu() {
 	    echo "===============ORE一键部署脚本==============="
 		echo "当前版本：$current_version"
 	    echo "沟通电报群：https://t.me/lumaogogogo"
-	    echo "单号需要的资源：1C1G5G；CPU核心越多越好"
+	    echo "单号需要的资源：4C8G100G；CPU核心越多越好"
 		echo "请选择要执行的操作:"
 	    echo "1. 部署节点"
 	    echo "2. 开始挖矿"
