@@ -28,8 +28,6 @@ function install_node() {
 	    echo "将 Solana CLI 添加到 PATH"
 	    export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
 	    export PATH="$HOME/.cargo/bin:$PATH"
-		echo 'export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"' >> ~/.bashrc
-		source ~/.bashrc
 	fi
 
 	# 安装 Ore CLI
@@ -51,25 +49,25 @@ function install_node() {
 function start_mining() {
 	
 	# 提示用户输入RPC配置地址
-	read -p "RPC 地址(默认https://api.mainnet-beta.solana.com): "  rpc_address
+	read -p "请输入 RPC 地址(默认https://api.mainnet-beta.solana.com): "  rpc_address
 	
 	# 用户输入要生成的钱包配置文件数量
-	read -p "钱包数量: " count
+	read -p "请输入钱包数量: " count
 	
 	# 用户输入优先费用
 	read -p "请输入交易的优先费用 (默认为 1): " priority_fee
 	priority_fee=${priority_fee:-1}
 	
 	# 用户输入线程数
-	read -p "挖矿线程数 (默认为 4): " threads
+	read -p "请输入挖矿时要使用的线程数 (默认为 4): " threads
 	threads=${threads:-4}
 	
 	# 基础会话名
 	session_base_name="ore"
 	
 	# 启动命令模板，使用变量替代rpc地址、优先费用和线程数
-	start_command_template="while true; do ore --rpc $rpc_address --keypair ~/.config/solana/idX.json --priority-fee $priority_fee mine --threads $threads; echo '异常退出，正在重启' >&2; sleep 1; done"
-
+	start_command_template="while true; do ore --rpc $rpc_address --keypair ~/.config/solana/idX.json --priority-fee $priority_fee mine --threads $threads; echo '程序异常退出，等待重启' >&2; sleep 1; done"
+	
 	# 确保.solana目录存在
 	mkdir -p ~/.config/solana
 	
@@ -194,7 +192,7 @@ function main_menu() {
 	    clear
 	    echo "===============ORE一键部署脚本==============="
 	    echo "沟通电报群：https://t.me/lumaogogogo"
-	    echo "单号需要的资源：1C1G5G；CPU核心越多越好"
+	    echo "单号需要的资源：1C1G5G；可根据自身情况多开"
 		echo "请选择要执行的操作:"
 	    echo "1. 部署节点"
 	    echo "2. 开始挖矿"
