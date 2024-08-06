@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240806003
+current_version=20240806004
 
 update_script() {
     # 指定URL
@@ -43,10 +43,8 @@ update_script() {
 # 部署节点
 function install_node() {
 	
-	# 更新系统和安装必要的包
-	echo "更新系统软件包..."
+	# 更新软件包
 	sudo apt update && sudo apt upgrade -y
-	echo "安装必要的工具和依赖..."
 	sudo apt install -y curl build-essential jq git libssl-dev pkg-config screen
 	
 	# 安装 Rust 和 Cargo
@@ -97,7 +95,7 @@ function start_mining() {
 	# 用户输入要生成的钱包配置文件数量
 	read -p "钱包数量: " count
 	
-	# 用户输入优先费用
+	# 用户输入gas费用
 	read -p "设置gas费用 (默认为1，建议50万以上): " priority_fee
 	priority_fee=${priority_fee:-1}
 	
@@ -108,7 +106,7 @@ function start_mining() {
 	# 基础会话名
 	session_base_name="ore"
 	
-	# 启动命令模板，使用变量替代rpc地址、优先费用和线程数
+	# 启动命令模板，使用变量替代rpc地址、gas费用和线程数
 	start_command_template="while true; do ore --rpc $rpc_address --keypair ~/.config/solana/idX.json --priority-fee $priority_fee mine --threads $threads; echo '异常退出，正在重启' >&2; sleep 1; done"
 
 	# 确保.solana目录存在
@@ -136,7 +134,7 @@ function start_mining() {
 	    # 生成会话名
 	    session_name="${session_base_name}_${i}"
 	
-	    # 替换启动命令中的配置文件名、RPC地址、优先费用和线程数
+	    # 替换启动命令中的配置文件名、RPC地址、gas费用和线程数
 	    start_command=${start_command_template//idX/id${i}}
 	
 	    # 打印开始信息
@@ -189,13 +187,13 @@ function cliam_multiple() {
 	  exit 1
 	fi
 	
-	# 提示用户输入优先费用
-	echo -n "请输入优先费用（单位：lamports，例如：50000）: "
+	# 提示用户输入gas费用
+	echo -n "请输入gas费用（单位：lamports，例如：50000）: "
 	read priority_fee
 	
 	# 确认用户输入的是有效的数字
 	if ! [[ "$priority_fee" =~ ^[0-9]+$ ]]; then
-	  echo "优先费用必须是一个整数。"
+	  echo "gas费用必须是一个整数。"
 	  exit 1
 	fi
 	
