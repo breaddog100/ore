@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240806001
+current_version=20240806002
 
 update_script() {
     # 指定URL
@@ -87,12 +87,17 @@ function start_mining() {
 	
 	# 提示用户输入RPC配置地址
 	read -p "RPC 地址(默认https://api.mainnet-beta.solana.com): "  rpc_address
-	
+	# 有效RPC检测
+	if [[ -z "$rpc_address" ]]; then
+	  echo "RPC地址不能为空。"
+	  exit 1
+	fi
+
 	# 用户输入要生成的钱包配置文件数量
 	read -p "钱包数量: " count
 	
 	# 用户输入优先费用
-	read -p "请输入交易的优先费用 (默认为 1): " priority_fee
+	read -p "设置gas费用 (默认为1，建议50万以上): " priority_fee
 	priority_fee=${priority_fee:-1}
 	
 	# 用户输入线程数
@@ -147,14 +152,16 @@ function start_mining() {
 
 # 查看奖励
 function check_multiple() {
-	# 提示用户同时输入起始和结束编号，用空格分隔
-	
-	# 提示用户输入RPC地址
-	echo -n "请输入RPC地址（例如 https://api.mainnet-beta.solana.com）: "
+	echo -n "RPC地址（例如 https://api.mainnet-beta.solana.com）: "
 	read rpc_address
 	
-	# 提示用户同时输入起始和结束编号，用空格分隔
-	echo -n "请输入起始和结束编号，中间用空格分隔（例如，对于10个钱包地址，输入1 10）: "
+	# 有效RPC检测
+	if [[ -z "$rpc_address" ]]; then
+	  echo "RPC地址不能为空。"
+	  exit 1
+	fi
+
+	echo -n "请输入起始和结束编号，中间用空格分隔（比如10个钱包地址，输入1 10）: "
 	read -a range
 	
 	# 获取起始和结束编号
@@ -170,13 +177,10 @@ function check_multiple() {
 
 # 领取奖励
 function cliam_multiple() {
-	#!/bin/bash
-	
-	# 提示用户输入RPC地址
 	echo -n "请输入RPC地址（例如：https://api.mainnet-beta.solana.com）: "
 	read rpc_address
 	
-	# 确认用户输入的是有效RPC地址
+	# 有效RPC检测
 	if [[ -z "$rpc_address" ]]; then
 	  echo "RPC地址不能为空。"
 	  exit 1
@@ -223,6 +227,12 @@ function check_logs() {
     screen -r ore
 }
 
+# 本机算力
+function benchmark() {
+	read -p "线程数 : " threads
+	ore benchmark --threads "$threads"
+}
+
 # 主菜单
 function main_menu() {
 	while true; do
@@ -232,12 +242,14 @@ function main_menu() {
 	    echo "沟通电报群：https://t.me/lumaogogogo"
 	    echo "单号需要的资源：4C8G100G；CPU核心越多越好"
 		echo "请选择要执行的操作:"
-	    echo "1. 部署节点"
-	    echo "2. 开始挖矿"
-	    echo "3. 查看奖励"
-	    echo "4. 领取奖励"
-	    echo "5. 停止挖矿"
-	    echo "6. 查看日志"
+	    echo "1. 部署节点 install_node"
+	    echo "2. 开始挖矿 start_mining"
+	    echo "3. 查看奖励 check_multiple"
+	    echo "4. 领取奖励 cliam_multiple"
+	    echo "5. 停止挖矿 stop_mining"
+	    echo "6. 查看日志 check_logs"
+		echo "7. 本机算力 benchmark"
+		
 	    echo "0. 退出脚本exit"
 	    read -p "请输入选项: " OPTION
 	
@@ -248,6 +260,7 @@ function main_menu() {
 	    4) cliam_multiple ;;
 	    5) stop_mining ;;
 	    6) check_logs ;;
+		7) benchmark ;;
 	    0) echo "退出脚本。"; exit 0 ;;
 	    *) echo "无效选项，请重新输入。"; sleep 3 ;;
 	    esac
