@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240806004
+current_version=20240806005
 
 update_script() {
     # 指定URL
@@ -188,7 +188,7 @@ function cliam_multiple() {
 	fi
 	
 	# 提示用户输入gas费用
-	echo -n "请输入gas费用（单位：lamports，例如：50000）: "
+	echo -n "请输入gas费用（例如：50000）: "
 	read priority_fee
 	
 	# 确认用户输入的是有效的数字
@@ -209,7 +209,7 @@ function cliam_multiple() {
 	while true; do
 	  # 执行循环
 	  for i in $(seq $start $end); do
-	    echo "执行钱包 $i 并且RPC $rpc_address and 以及 $priority_fee"
+	    echo "钱包 $i RPC $rpc_address and gas： $priority_fee"
 	    ore --rpc $rpc_address --keypair ~/.config/solana/id$i.json --priority-fee $priority_fee claim
 	    
 	    done
