@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240806002
+current_version=20240806003
 
 update_script() {
     # 指定URL
@@ -84,6 +84,7 @@ function install_node() {
 
 # 开始挖矿
 function start_mining() {
+	source ~/.bashrc
 	
 	# 提示用户输入RPC配置地址
 	read -p "RPC 地址(默认https://api.mainnet-beta.solana.com): "  rpc_address
@@ -152,6 +153,7 @@ function start_mining() {
 
 # 查看奖励
 function check_multiple() {
+	source ~/.bashrc
 	echo -n "RPC地址（例如 https://api.mainnet-beta.solana.com）: "
 	read rpc_address
 	
@@ -177,6 +179,7 @@ function check_multiple() {
 
 # 领取奖励
 function cliam_multiple() {
+	source ~/.bashrc
 	echo -n "请输入RPC地址（例如：https://api.mainnet-beta.solana.com）: "
 	read rpc_address
 	
@@ -187,7 +190,7 @@ function cliam_multiple() {
 	fi
 	
 	# 提示用户输入优先费用
-	echo -n "请输入优先费用（单位：lamports，例如：500000）: "
+	echo -n "请输入优先费用（单位：lamports，例如：50000）: "
 	read priority_fee
 	
 	# 确认用户输入的是有效的数字
@@ -229,6 +232,7 @@ function check_logs() {
 
 # 本机算力
 function benchmark() {
+	source ~/.bashrc
 	read -p "线程数 : " threads
 	ore benchmark --threads "$threads"
 }
