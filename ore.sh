@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240806005
+current_version=20240808001
 
 update_script() {
     # 指定URL
@@ -107,7 +107,7 @@ function start_mining() {
 	session_base_name="ore"
 	
 	# 启动命令模板，使用变量替代rpc地址、gas费用和线程数
-	start_command_template="while true; do ore --rpc $rpc_address --keypair ~/.config/solana/idX.json --priority-fee $priority_fee mine --threads $threads; echo '异常退出，正在重启' >&2; sleep 1; done"
+	start_command_template="while true; do ore --rpc $rpc_address --keypair ~/.config/solana/idX.json --priority-fee $priority_fee mine --cores $threads; echo '异常退出，正在重启' >&2; sleep 1; done"
 
 	# 确保.solana目录存在
 	mkdir -p ~/.config/solana
@@ -209,7 +209,7 @@ function cliam_multiple() {
 	while true; do
 	  # 执行循环
 	  for i in $(seq $start $end); do
-	    echo "钱包 $i RPC $rpc_address and gas： $priority_fee"
+	    echo "钱包 $i ， RPC：$rpc_address ， GAS： $priority_fee"
 	    ore --rpc $rpc_address --keypair ~/.config/solana/id$i.json --priority-fee $priority_fee claim
 	    
 	    done
@@ -232,7 +232,7 @@ function check_logs() {
 function benchmark() {
 	source ~/.bashrc
 	read -p "线程数 : " threads
-	ore benchmark --threads "$threads"
+	ore benchmark --cores "$threads"
 }
 
 # 主菜单
