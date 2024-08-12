@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240812003
+current_version=20240812004
 
 update_script() {
     # 指定URL
@@ -301,6 +301,62 @@ function server_log(){
 	screen -r ore-hq-server
 }
 
+# 停止服务端
+function stop_server(){
+	echo "正在终止服务端..."
+	screen -S ore-hq-server -X quit
+	echo "服务端已终止..."
+}
+
+# 启动服务端
+function start_server(){
+	read -p "请输入gas(默认2000): " priority_fee
+	# 有效秘钥检测
+	if [[ -z "$priority_fee" ]]; then
+	  echo "秘钥不能为空。"
+	  exit 1
+	fi
+
+	export WALLET_PATH=$HOME/ore-hq-server/id.json
+	cd $HOME/ore-hq-server/target/release
+	screen -dmS ore-hq-server ./ore-hq-server --priority_fee $priority_fee
+
+	# 获取公网 IP 地址
+	public_ip=$(curl -s ifconfig.me)
+
+	printf "\033[31m集群服务端已启动，公网IP为：%s\033[0m\n" "$public_ip"
+}
+
+# 停止客户端
+function stop_client(){
+	echo "正在终止客户端..."
+	screen -S ore-hq-client -X quit
+	echo "客户端已终止..."
+}
+
+# 启动客户端
+function start_client(){
+	read -p "请输入集群服务端IP: " server_ip
+	# 有效IP检测
+	if [[ -z "$server_ip" ]]; then
+	  echo "IP地址不能为空。"
+	  exit 1
+	fi
+
+	read -p "请输入挖矿线程数: " threads
+	# 有效threads检测
+	if [[ -z "$threads" ]]; then
+	  echo "threads不能为空。"
+	  exit 1
+	fi
+
+	# 配置文件路径
+	config_file=$HOME/ore-hq-client/id.json
+
+	cd $HOME/ore-hq-client/target/release
+	screen -dmS ore-hq-client ./ore-hq-client --url ws://$server_ip:3000  --threads $threads --keypair $config_file
+}
+
 # 部署集群客户端
 function install_client(){
 	read -p "请输入集群服务端IP: " server_ip
@@ -376,8 +432,12 @@ function main_menu() {
 		echo "-------------集群方式，中彩票---------------"
 		echo "21. 部署服务端 install_server"
 		echo "22. 服务端日志 server_log"
-		echo "23. 部署客户端 install_client"
-		echo "24. 客户端日志 client_log"
+		echo "23. 停止服务端 stop_server"
+		echo "24. 启动服务端 start_server"
+		echo "25. 部署客户端 install_client"
+		echo "26. 客户端日志 client_log"
+		echo "27. 停止客户端 stop_client"
+		echo "28. 客户端日志 start_client"
 
 	    echo "0. 退出脚本exit"
 	    read -p "请输入选项: " OPTION
@@ -390,10 +450,16 @@ function main_menu() {
 	    5) stop_mining ;;
 	    6) check_logs ;;
 		7) benchmark ;;
+
 		21) install_server ;;
 		22) server_log ;;
-		23) install_client ;;
-		24) client_log ;;
+		23) stop_server ;;
+		24) start_server ;;
+
+		25) install_client ;;
+		26) client_log ;;
+		27) stop_client ;;
+		28) start_client ;;
 
 	    0) echo "退出脚本。"; exit 0 ;;
 	    *) echo "无效选项，请重新输入。"; sleep 3 ;;
