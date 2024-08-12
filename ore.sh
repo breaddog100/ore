@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240812001
+current_version=20240812002
 
 update_script() {
     # 指定URL
@@ -44,7 +44,7 @@ update_script() {
 function basic_env(){
 	# 更新软件包
 	sudo apt update && sudo apt upgrade -y
-	sudo apt install -y curl build-essential jq git libssl-dev pkg-config screen
+	sudo apt install -y curl build-essential jq git libssl-dev pkg-config screen pkg-config libmysqlclient-dev
 	
 	# 安装 Rust 和 Cargo
 	echo "正在安装 Rust 和 Cargo..."
@@ -320,7 +320,7 @@ function install_client(){
 	basic_env
 
 	cd $HOME
-	git clone git clone https://github.com/Kriptikz/ore-hq-client
+	git clone https://github.com/Kriptikz/ore-hq-client
 	cd $HOME/ore-hq-client
 
 	# 生成配置文件路径
@@ -387,7 +387,7 @@ function main_menu() {
 		22) server_log ;;
 		23) install_client ;;
 		24) client_log ;;
-		
+
 	    0) echo "退出脚本。"; exit 0 ;;
 	    *) echo "无效选项，请重新输入。"; sleep 3 ;;
 	    esac
