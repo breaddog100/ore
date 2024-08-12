@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240808001
+current_version=20240812001
 
 update_script() {
     # 指定URL
@@ -40,9 +40,8 @@ update_script() {
 
 }
 
-# 部署节点
-function install_node() {
-	
+# 安装基础环境
+function basic_env(){
 	# 更新软件包
 	sudo apt update && sudo apt upgrade -y
 	sudo apt install -y curl build-essential jq git libssl-dev pkg-config screen
@@ -64,6 +63,13 @@ function install_node() {
 		echo 'export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"' >> ~/.bashrc
 		source ~/.bashrc
 	fi
+}
+
+
+# 部署节点
+function install_node() {
+	
+	basic_env
 
 	# 安装 Ore CLI
 	echo "正在安装 Ore CLI..."
@@ -235,6 +241,109 @@ function benchmark() {
 	ore benchmark --cores "$threads"
 }
 
+# 部署集群服务端
+function install_server(){
+	read -p "请输入RPC: " rpc_address
+	# 有效RPC检测
+	if [[ -z "$rpc_address" ]]; then
+	  echo "RPC地址不能为空。"
+	  exit 1
+	fi
+
+	read -p "请输入服务端密码: " passwd_server
+	read -p "请输入钱包秘钥: " private_key
+	# 有效秘钥检测
+	if [[ -z "$private_key" ]]; then
+	  echo "秘钥不能为空。"
+	  exit 1
+	fi
+
+	basic_env
+
+	cd $HOME
+	git clone https://github.com/Kriptikz/ore-hq-server
+	cd $HOME/ore-hq-server
+	
+	# 生成配置文件路径
+	config_file=$HOME/ore-hq-server/id.json
+	# 直接将私钥写入配置文件
+	echo $private_key > $config_file
+
+	echo 'WALLET_PATH = "$HOME/ore-hq-server/id.json"
+	RPC_URL = "$rpc_address"
+	PASSWORD = "$passwd_server"' > "$HOME/ore-hq-server/.env"
+
+	cargo build --release
+
+	export WALLET_PATH=$HOME/ore-hq-server/id.json
+	cd $HOME/ore-hq-server/target/release
+	screen -dmS ore-hq-server ./ore-hq-server
+
+	# 获取公网 IP 地址
+	public_ip=$(curl -s ifconfig.me)
+
+	printf "\033[31m集群服务端已启动，公网IP为：%s\033[0m\n" "$public_ip"
+
+}
+
+# 查看服务端日志
+function server_log(){
+	echo ""
+	printf "\033[31m请同时按键盘Ctrl + a + d 退出\033[0m\n"
+	sleep 3
+	screen -r ore-hq-server
+}
+
+# 部署集群客户端
+function install_client(){
+	read -p "请输入集群服务端IP: " server_ip
+	# 有效IP检测
+	if [[ -z "$server_ip" ]]; then
+	  echo "IP地址不能为空。"
+	  exit 1
+	fi
+
+	read -p "请输入挖矿线程数: " threads
+	# 有效threads检测
+	if [[ -z "$threads" ]]; then
+	  echo "threads不能为空。"
+	  exit 1
+	fi
+
+	read -p "请输入钱包秘钥: " private_key
+	# 有效秘钥检测
+	if [[ -z "$private_key" ]]; then
+	  echo "秘钥不能为空。"
+	  exit 1
+	fi
+
+	basic_env
+
+	cd $HOME
+	git clone git clone https://github.com/Kriptikz/ore-hq-client
+	cd $HOME/ore-hq-client
+
+	# 生成配置文件路径
+	config_file=$HOME/ore-hq-client/id.json
+	# 直接将私钥写入配置文件
+	echo $private_key > $config_file
+
+	cargo build --release
+	cd $HOME/ore-hq-client/target/release
+	screen -dmS ore-hq-client ./ore-hq-client --url ws://$server_ip:3000  --threads $threads --keypair $config_file
+
+	echo "集群客户端已启动..."
+
+}
+
+# 查看客户端日志
+function client_log(){
+	echo ""
+	printf "\033[31m请同时按键盘Ctrl + a + d 退出\033[0m\n"
+	sleep 3
+	screen -r ore-hq-client
+}
+
 # 主菜单
 function main_menu() {
 	while true; do
@@ -242,7 +351,13 @@ function main_menu() {
 	    echo "===============ORE一键部署脚本==============="
 		echo "当前版本：$current_version"
 	    echo "沟通电报群：https://t.me/lumaogogogo"
-	    echo "单号需要的资源：4C8G100G；CPU核心越多越好"
+	    echo "最低配置：4C8G100G；CPU核心越多越好"
+		echo "集群模式采用目前流行的中彩票模式："
+		echo "1台高配机型兜底，建议算力至少4000以上"
+		echo "N低配机型博彩票，建议至少4C以上，至少5台以上"
+		echo "集群代码采用Kriptikz的"
+		echo "git地址：https://github.com/Kriptikz"
+		echo "----------SOLO方式，适合高算力机器-----------"
 		echo "请选择要执行的操作:"
 	    echo "1. 部署节点 install_node"
 	    echo "2. 开始挖矿 start_mining"
@@ -251,7 +366,12 @@ function main_menu() {
 	    echo "5. 停止挖矿 stop_mining"
 	    echo "6. 查看日志 check_logs"
 		echo "7. 本机算力 benchmark"
-		
+		echo "-------------集群方式，中彩票---------------"
+		echo "21. 部署服务端 install_server"
+		echo "22. 服务端日志 server_log"
+		echo "23. 部署客户端 install_client"
+		echo "24. 客户端日志 client_log"
+
 	    echo "0. 退出脚本exit"
 	    read -p "请输入选项: " OPTION
 	
@@ -263,6 +383,11 @@ function main_menu() {
 	    5) stop_mining ;;
 	    6) check_logs ;;
 		7) benchmark ;;
+		21) install_server ;;
+		22) server_log ;;
+		23) install_client ;;
+		24) client_log ;;
+		
 	    0) echo "退出脚本。"; exit 0 ;;
 	    *) echo "无效选项，请重新输入。"; sleep 3 ;;
 	    esac
