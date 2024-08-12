@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240812002
+current_version=20240812003
 
 update_script() {
     # 指定URL
@@ -258,6 +258,13 @@ function install_server(){
 	  exit 1
 	fi
 
+	read -p "请输入gas(默认2000): " priority_fee
+	# 有效秘钥检测
+	if [[ -z "$priority_fee" ]]; then
+	  echo "秘钥不能为空。"
+	  exit 1
+	fi
+
 	basic_env
 
 	cd $HOME
@@ -277,7 +284,7 @@ function install_server(){
 
 	export WALLET_PATH=$HOME/ore-hq-server/id.json
 	cd $HOME/ore-hq-server/target/release
-	screen -dmS ore-hq-server ./ore-hq-server
+	screen -dmS ore-hq-server ./ore-hq-server --priority_fee $priority_fee
 
 	# 获取公网 IP 地址
 	public_ip=$(curl -s ifconfig.me)
