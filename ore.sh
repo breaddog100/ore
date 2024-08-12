@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240812006
+current_version=20240812007
 
 update_script() {
     # 指定URL
@@ -272,9 +272,9 @@ function install_server(){
 	# 直接将私钥写入配置文件
 	echo $private_key > $config_file
 
-	echo 'WALLET_PATH = "$HOME/ore-hq-server/id.json"
-	RPC_URL = "$rpc_address"
-	PASSWORD = "$passwd_server"' > "$HOME/ore-hq-server/.env"
+	echo "WALLET_PATH = $HOME/ore-hq-server/id.json
+	RPC_URL = $RPC_URL
+	PASSWORD = $PASSWORD" > $HOME/ore-hq-server/.env
 
 	cargo build --release
 
