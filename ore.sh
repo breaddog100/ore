@@ -259,11 +259,7 @@ function install_server(){
 	fi
 
 	read -p "请输入gas(默认2000): " priority_fee
-	# 有效秘钥检测
-	if [[ -z "$priority_fee" ]]; then
-	  echo "秘钥不能为空。"
-	  exit 1
-	fi
+	priority_fee=${priority_fee:-2000}
 
 	basic_env
 
@@ -311,11 +307,7 @@ function stop_server(){
 # 启动服务端
 function start_server(){
 	read -p "请输入gas(默认2000): " priority_fee
-	# 有效gas检测
-	if [[ -z "$priority_fee" ]]; then
-	  echo "gas不能为空。"
-	  exit 1
-	fi
+	priority_fee=${priority_fee:-2000}
 
 	export WALLET_PATH=$HOME/ore-hq-server/id.json
 	cd $HOME/ore-hq-server/target/release
