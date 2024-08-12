@@ -311,15 +311,15 @@ function stop_server(){
 # 启动服务端
 function start_server(){
 	read -p "请输入gas(默认2000): " priority_fee
-	# 有效秘钥检测
+	# 有效gas检测
 	if [[ -z "$priority_fee" ]]; then
-	  echo "秘钥不能为空。"
+	  echo "gas不能为空。"
 	  exit 1
 	fi
 
 	export WALLET_PATH=$HOME/ore-hq-server/id.json
 	cd $HOME/ore-hq-server/target/release
-	screen -dmS ore-hq-server ./ore-hq-server --priority_fee $priority_fee
+	screen -dmS ore-hq-server ./ore-hq-server --priority-fee $priority_fee
 
 	# 获取公网 IP 地址
 	public_ip=$(curl -s ifconfig.me)
