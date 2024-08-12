@@ -280,7 +280,7 @@ function install_server(){
 
 	export WALLET_PATH=$HOME/ore-hq-server/id.json
 	cd $HOME/ore-hq-server/target/release
-	screen -dmS ore-hq-server ./ore-hq-server --priority_fee $priority_fee
+	screen -dmS ore-hq-server ./ore-hq-server --priority-fee $priority_fee
 
 	# 获取公网 IP 地址
 	public_ip=$(curl -s ifconfig.me)
