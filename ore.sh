@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240813002
+current_version=20240813003
 
 update_script() {
     # 指定URL
@@ -385,6 +385,9 @@ function install_client(){
 	config_file=$HOME/ore-hq-client/id.json
 	# 直接将私钥写入配置文件
 	echo $private_key > $config_file
+
+	# 回溯版本
+	git reset --hard eb681156cc5ce2b33b00ef19209b83e5be4f46f4
 
 	cargo build --release
 	cd $HOME/ore-hq-client/target/release
