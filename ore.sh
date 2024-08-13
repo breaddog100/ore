@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240813004
+current_version=20240813005
 
 update_script() {
     # 指定URL
@@ -391,7 +391,7 @@ function install_client(){
 
 	cargo build --release
 	cd $HOME/ore-hq-client/target/release
-	screen -dmS ore-hq-client ./ore-hq-client --url ws://$server_ip:3000  --cores $threads --keypair $config_file
+	screen -dmS ore-hq-client ./ore-hq-client --url ws://$server_ip:3000  --threads $threads --keypair $config_file
 
 	echo "集群客户端已启动..."
 
