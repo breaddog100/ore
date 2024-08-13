@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240813003
+current_version=20240813004
 
 update_script() {
     # 指定URL
@@ -435,7 +435,7 @@ function main_menu() {
 		echo "25. 部署客户端 install_client"
 		echo "26. 客户端日志 client_log"
 		echo "27. 停止客户端 stop_client"
-		echo "28. 客户端日志 start_client"
+		echo "28. 启动客户端 start_client"
 
 	    echo "0. 退出脚本exit"
 	    read -p "请输入选项: " OPTION
