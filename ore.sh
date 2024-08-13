@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240812007
+current_version=20240813001
 
 update_script() {
     # 指定URL
@@ -273,8 +273,11 @@ function install_server(){
 	echo $private_key > $config_file
 
 	echo "WALLET_PATH = $HOME/ore-hq-server/id.json
-	RPC_URL = $RPC_URL
-	PASSWORD = $PASSWORD" > $HOME/ore-hq-server/.env
+RPC_URL = $rpc_address
+PASSWORD = $passwd_server" > $HOME/ore-hq-server/.env
+
+	# 回溯版本
+	git reset --hard a0e1d6c80ea9d17a83c9dc198a5cdba87d325e91
 
 	cargo build --release
 
