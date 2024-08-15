@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240813005
+current_version=20240815001
 
 update_script() {
     # 指定URL
@@ -40,11 +40,49 @@ update_script() {
 
 }
 
+# 安装MySQL数据库
+function mysql_install(){
+
+	# 检查Docker是否已安装
+	if [ -x "$(command -v docker)" ]; then
+	    echo "Docker is already installed."
+	else
+	    echo "Docker is not installed. Installing Docker..."
+	    # 更新apt包索引
+	    sudo apt-get update
+	    # 安装包以允许apt通过HTTPS使用仓库
+	    sudo apt-get install -y \
+	        apt-transport-https \
+	        ca-certificates \
+	        curl \
+	        software-properties-common
+	    # 添加Docker的官方GPG密钥
+	    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+	    # 设置稳定仓库
+	    sudo add-apt-repository \
+	        "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+	        $(lsb_release -cs) \
+	        stable"
+	    # 再次更新apt包索引
+	    sudo apt-get update -y
+	    # 安装最新版本的Docker CE
+	    sudo apt-get install -y docker-ce
+	    # 输出Docker的版本号来验证安装
+	    docker --version
+	fi
+
+	sudo docker search mysql
+	sudo docker pull mysql:8.0
+	sudo docker run -p 3307:3306 --name mysql -e MYSQL_ROOT_PASSWORD=$1 -d mysql:8.0
+	sudo apt install mysql-client-core-8.0
+
+}
+
 # 安装基础环境
 function basic_env(){
 	# 更新软件包
 	sudo apt update && sudo apt upgrade -y
-	sudo apt install -y curl build-essential jq git libssl-dev pkg-config screen pkg-config libmysqlclient-dev
+	sudo apt install -y curl build-essential jq git libssl-dev pkg-config screen pkg-config libmysqlclient-dev mysql-server
 	
 	# 安装 Rust 和 Cargo
 	echo "正在安装 Rust 和 Cargo..."
@@ -261,24 +299,54 @@ function install_server(){
 	read -p "请输入gas(默认2000): " priority_fee
 	priority_fee=${priority_fee:-2000}
 
+	mysql_install $passwd_server
 	basic_env
 
 	cd $HOME
 	git clone https://github.com/Kriptikz/ore-hq-server
 	cd $HOME/ore-hq-server
-	
+
+	# 初始化数据库
+	echo "初始化 ore 数据库..."
+	# 获取当前日期，格式为YYYYMMDD
+	current_date=$(date +"%Y%m%d")
+
+	# 重命名现有的 ore 数据库为 ore_当前日期
+	echo "检查是否存在 ore 数据库..."
+	database_exists=$(mysql -h 127.0.0.1 -P 3307 -u root -p$passwd_server -e "SHOW DATABASES LIKE 'ore';" | grep "ore")
+
+	if [ "$database_exists" ]; then
+		echo "备份现有ore数据库 ore_$current_date..."
+		mysql -h 127.0.0.1 -P 3307 -u root -proot -e "RENAME DATABASE ore TO ore_$current_date;"
+	fi
+
+	mysql -h 127.0.0.1 -P 3307 -u root -p$passwd_server -e "CREATE DATABASE IF NOT EXISTS ore;"
+
+	for sql_file in $(find "$(pwd)" -name "down.sql")
+	do
+		echo "正在执行: $sql_file"
+		mysql -h 127.0.0.1 -P 3307 -u root -p$passwd_server ore < "$sql_file"
+	done
+
+	for sql_file in $(find "$(pwd)" -name "up.sql")
+	do
+		echo "正在执行: $sql_file"
+		mysql -h 127.0.0.1 -P 3307 -u root -p$passwd_server ore < "$sql_file"
+	done
+
 	# 生成配置文件路径
 	config_file=$HOME/ore-hq-server/id.json
 	# 直接将私钥写入配置文件
 	echo $private_key > $config_file
 
 	echo "WALLET_PATH = $HOME/ore-hq-server/id.json
-RPC_URL = $rpc_address
-PASSWORD = $passwd_server" > $HOME/ore-hq-server/.env
+RPC_WS_URL = $rpc_address
+PASSWORD = $passwd_server
+DATABASE_URL = mysql://root:$passwd_server@127.0.0.1:3307/ore " > $HOME/ore-hq-server/.env
 
 	# 回溯版本
-	git reset --hard a0e1d6c80ea9d17a83c9dc198a5cdba87d325e91
-
+	#git reset --hard a0e1d6c80ea9d17a83c9dc198a5cdba87d325e91
+	git reset --hard 24b4130a461a7d0dee2a1e54e718c419e69aaa1d
 	cargo build --release
 
 	export WALLET_PATH=$HOME/ore-hq-server/id.json
@@ -347,9 +415,8 @@ function start_client(){
 
 	# 配置文件路径
 	config_file=$HOME/ore-hq-client/id.json
-
 	cd $HOME/ore-hq-client/target/release
-	screen -dmS ore-hq-client ./ore-hq-client --url ws://$server_ip:3000  --threads $threads --keypair $config_file
+	screen -dmS ore-hq-client ./ore-hq-client --url ws://$server_ip:3000 --keypair $config_file -u mine
 }
 
 # 部署集群客户端
@@ -386,12 +453,10 @@ function install_client(){
 	# 直接将私钥写入配置文件
 	echo $private_key > $config_file
 
-	# 回溯版本
-	git reset --hard eb681156cc5ce2b33b00ef19209b83e5be4f46f4
-
 	cargo build --release
 	cd $HOME/ore-hq-client/target/release
-	screen -dmS ore-hq-client ./ore-hq-client --url ws://$server_ip:3000  --threads $threads --keypair $config_file
+	./ore-hq-client --url ws://$server_ip:3000 --keypair $config_file -u signup
+	screen -dmS ore-hq-client ./ore-hq-client --url ws://$server_ip:3000 --keypair $config_file -u mine
 
 	echo "集群客户端已启动..."
 
@@ -422,7 +487,7 @@ function main_menu() {
 		echo "请选择要执行的操作:"
 	    echo "1. 部署节点 install_node"
 	    echo "2. 开始挖矿 start_mining"
-	    echo "3. 查看奖励 check_multiple"
+	    echo "3. 奖励列表 check_multiple"
 	    echo "4. 领取奖励 cliam_multiple"
 	    echo "5. 停止挖矿 stop_mining"
 	    echo "6. 查看日志 check_logs"
