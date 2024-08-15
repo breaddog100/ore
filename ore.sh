@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240815002
+current_version=20240815003
 
 update_script() {
     # 指定URL
@@ -423,7 +423,7 @@ function start_client(){
 	# 配置文件路径
 	config_file=$HOME/ore-hq-client/id.json
 	cd $HOME/ore-hq-client/target/release
-	screen -dmS ore-hq-client ./ore-hq-client --url ws://$server_ip:3000 --keypair $config_file -u mine
+	screen -dmS ore-hq-client ./ore-hq-client --url $server_ip:3000 --keypair $config_file -u mine
 }
 
 # 部署集群客户端
@@ -462,8 +462,8 @@ function install_client(){
 
 	cargo build --release
 	cd $HOME/ore-hq-client/target/release
-	./ore-hq-client --url ws://$server_ip:3000 --keypair $config_file -u signup
-	screen -dmS ore-hq-client ./ore-hq-client --url ws://$server_ip:3000 --keypair $config_file -u mine
+	./ore-hq-client --url $server_ip:3000 --keypair $config_file -u signup
+	screen -dmS ore-hq-client ./ore-hq-client --url $server_ip:3000 --keypair $config_file -u mine
 
 	echo "集群客户端已启动..."
 
