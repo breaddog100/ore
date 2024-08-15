@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240815001
+current_version=20240815002
 
 update_script() {
     # 指定URL
@@ -287,6 +287,12 @@ function install_server(){
 	  echo "RPC地址不能为空。"
 	  exit 1
 	fi
+	read -p "请输入RPC WSS: " rpc_ws_address
+	# 有效RPC检测
+	if [[ -z "$rpc_ws_address" ]]; then
+	  echo "RPC WSS地址不能为空。"
+	  exit 1
+	fi
 
 	read -p "请输入服务端密码: " passwd_server
 	read -p "请输入钱包秘钥: " private_key
@@ -340,7 +346,8 @@ function install_server(){
 	echo $private_key > $config_file
 
 	echo "WALLET_PATH = $HOME/ore-hq-server/id.json
-RPC_WS_URL = $rpc_address
+RPC_URL = $rpc_address
+RPC_WS_URL = $rpc_ws_address
 PASSWORD = $passwd_server
 DATABASE_URL = mysql://root:$passwd_server@127.0.0.1:3307/ore " > $HOME/ore-hq-server/.env
 
