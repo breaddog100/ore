@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240815003
+current_version=20240815005
 
 update_script() {
     # 指定URL
@@ -71,7 +71,7 @@ function mysql_install(){
 	    docker --version
 	fi
 
-	sudo docker search mysql
+	#sudo docker search mysql
 	sudo docker pull mysql:8.0
 	sudo docker run -p 3307:3306 --name mysql -e MYSQL_ROOT_PASSWORD=$1 -d mysql:8.0
 	sudo apt install mysql-client-core-8.0
@@ -323,7 +323,7 @@ function install_server(){
 
 	if [ "$database_exists" ]; then
 		echo "备份现有ore数据库 ore_$current_date..."
-		mysql -h 127.0.0.1 -P 3307 -u root -proot -e "RENAME DATABASE ore TO ore_$current_date;"
+		mysql -h 127.0.0.1 -P 3307 -u root -p$passwd_server -e "RENAME DATABASE ore TO ore_$current_date;"
 	fi
 
 	mysql -h 127.0.0.1 -P 3307 -u root -p$passwd_server -e "CREATE DATABASE IF NOT EXISTS ore;"
