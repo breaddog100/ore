@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240816001
+current_version=20240816002
 
 update_script() {
     # 指定URL
@@ -73,7 +73,9 @@ function mysql_install(){
 
 	#sudo docker search mysql
 	sudo docker pull mysql:8.0
-	sudo docker run -p 3307:3306 --name mysql -e MYSQL_ROOT_PASSWORD=$1 -d mysql:8.0
+	mkdir -p $HOME/mysql_data
+	sudo docker rm mysql
+	sudo docker run -d -p 3307:3306 --name mysql -e MYSQL_ROOT_PASSWORD=$1 -v $HOME/mysql_data:/var/lib/mysql mysql:8.0
 	sudo apt install mysql-client-core-8.0
 
 }
